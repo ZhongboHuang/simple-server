@@ -1,9 +1,17 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
+import { RoleModule } from './role/role.module';
+import { PermissionModule } from './permission/permission.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true, //全局注册
+      envFilePath: '.env',
+    }),
     TypeOrmModule.forRoot({
       type: 'mysql',
       autoLoadEntities: true, //自动加载实体
@@ -15,6 +23,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       database: 'simple-database', //数据库名
     }),
     UserModule,
+    AuthModule,
+    RoleModule,
+    PermissionModule,
   ],
 })
 export class AppModule {}

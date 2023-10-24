@@ -14,15 +14,33 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
   async create(createUserDto: CreateUserDto) {
-    return await this.userRepository.save(createUserDto);
+    const { username } = createUserDto;
+    const existUser = await this.userRepository.findOne({
+      where: { username },
+    });
+    if (existUser) {
+      throw new ApiException('用户名已存在', ApiErrorCode.USERNAME_EXIST);
+    }
+    try {
+      const newUser = await this.userRepository.create(createUserDto);
+      return await this.userRepository.save(newUser);
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
   }
 
   async findAll() {
     return await this.userRepository.find();
   }
 
-  async findOne(id: number) {
+  async findOneById(id: number) {
     return await this.userRepository.findBy({ id });
+  }
+
+  async findOneByUsername(username: string) {
+    const user = await this.userRepository.findOne({ where: { username } });
+    if (!user) throw new HttpException('用户不存在', HttpStatus.BAD_REQUEST);
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {
