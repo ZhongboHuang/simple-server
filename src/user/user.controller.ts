@@ -10,6 +10,7 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { Permissions } from '@/public/public.decorator';
 
 @Controller('user')
 export class UserController {
@@ -38,5 +39,11 @@ export class UserController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
+  }
+
+  @Post('test')
+  @Permissions('create', 'read')
+  test(@Body() testParams) {
+    return this.userService.test(testParams);
   }
 }

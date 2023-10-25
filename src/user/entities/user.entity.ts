@@ -1,6 +1,14 @@
-import { Column, Entity, PrimaryGeneratedColumn, BeforeInsert } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  BeforeInsert,
+  ManyToMany,
+  JoinTable,
+} from 'typeorm';
 import encrypt from '@/utils/crypto';
 import * as crypto from 'crypto';
+import { Role } from '@/role/entities/role.entity';
 
 @Entity('user')
 export class User {
@@ -15,6 +23,14 @@ export class User {
 
   @Column({ nullable: true })
   salt: string; // 密码盐
+
+  @ManyToMany(() => Role)
+  @JoinTable({
+    name: 'user_role',
+    // joinColumn: { name: 'user_id' },
+    // inverseJoinColumn: { name: 'role_id' },
+  })
+  roles: Role[];
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   create_time: Date;

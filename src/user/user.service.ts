@@ -2,19 +2,22 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In } from 'typeorm';
 import { User } from './entities/user.entity';
 import { ApiException } from 'src/common/filter/http-exception/api.exception';
 import { ApiErrorCode } from 'src/common/enums/api-error-code.enum';
+import { Role } from '@/role/entities/role.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Role)
+    private roleRepository: Repository<Role>,
   ) {}
   async create(createUserDto: CreateUserDto) {
-    const { username } = createUserDto;
+    const { username, password, roleIds } = createUserDto;
     const existUser = await this.userRepository.findOne({
       where: { username },
     });
@@ -22,7 +25,14 @@ export class UserService {
       throw new ApiException('用户名已存在', ApiErrorCode.USERNAME_EXIST);
     }
     try {
-      const newUser = await this.userRepository.create(createUserDto);
+      const roles = await this.roleRepository.find({
+        where: { id: In(roleIds) },
+      });
+      const newUser = await this.userRepository.create({
+        username,
+        password,
+        roles,
+      });
       return await this.userRepository.save(newUser);
     } catch (error) {
       throw new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -49,5 +59,21 @@ export class UserService {
 
   async remove(id: number) {
     return await this.userRepository.delete(id);
+  }
+
+  async findPermissionCodes(token: string, userInfo) {
+    const user = await this.userRepository.findOne({
+      where: { username: userInfo.username },
+      relations: ['roles', 'roles.permissions'],
+    });
+    const permissionCodes = user.roles.reduce((acc, cur) => {
+      acc.push(...cur.permissions.map((item) => item.permission_code));
+      return acc;
+    }, []);
+    return permissionCodes;
+  }
+
+  test(testParams: { msg: string }) {
+    return testParams;
   }
 }
