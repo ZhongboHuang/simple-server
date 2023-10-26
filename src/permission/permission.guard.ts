@@ -24,12 +24,9 @@ export class PermissionGuard implements CanActivate {
       token,
       request.user,
     );
-    console.log(requiredPermissions);
-    console.log(permissionCodes);
     const isContainer = requiredPermissions.every((permission) =>
       permissionCodes.includes(permission),
     );
-    console.log(isContainer);
     if (!isContainer) {
       throw new ApiException('权限不足', ApiErrorCode.FORBIDDEN);
     }

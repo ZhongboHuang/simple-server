@@ -7,6 +7,7 @@ import { User } from './entities/user.entity';
 import { ApiException } from 'src/common/filter/http-exception/api.exception';
 import { ApiErrorCode } from 'src/common/enums/api-error-code.enum';
 import { Role } from '@/role/entities/role.entity';
+import { CacheService } from '@/cache/cache.service';
 
 @Injectable()
 export class UserService {
@@ -15,6 +16,7 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(Role)
     private roleRepository: Repository<Role>,
+    private cacheService: CacheService,
   ) {}
   async create(createUserDto: CreateUserDto) {
     const { username, password, roleIds } = createUserDto;
@@ -73,7 +75,8 @@ export class UserService {
     return permissionCodes;
   }
 
-  test(testParams: { msg: string }) {
-    return testParams;
+  async test(testParams: { msg: string }) {
+    const { msg } = testParams;
+    return await this.cacheService.set('message', msg);
   }
 }
