@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filter/http-exception/http-exception.filter';
 import { TransformInterceptor } from './common/interceptor/transform/transform.interceptor';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,6 +21,10 @@ async function bootstrap() {
 
   SwaggerModule.setup('/api/swagger', app, document);
 
-  await app.listen(3000);
+  const configService = app.get(ConfigService); // 获取全局配置
+  const PORT = configService.get<number>('PORT', 3000);
+  // const HOST = configService.get('HOST', 'localhost');
+
+  await app.listen(PORT);
 }
 bootstrap();

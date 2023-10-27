@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CacheService } from './cache.service';
 import { CacheController } from './cache.controller';
 import { createClient } from 'redis';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   controllers: [CacheController],
@@ -9,11 +10,12 @@ import { createClient } from 'redis';
     CacheService,
     {
       provide: 'REDIS_CLIENT',
-      async useFactory() {
+      inject: [ConfigService],
+      async useFactory(config: ConfigService) {
         const client = createClient({
           socket: {
-            host: 'localhost',
-            port: 6379,
+            host: config.get('REDIS_HOST', 'localhost'),
+            port: config.get('REDIS_PORT', 6379),
           },
         });
         await client.connect();
