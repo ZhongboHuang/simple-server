@@ -9,6 +9,9 @@ import { CacheModule } from './cache/cache.module';
 
 const isProd = process.env.NODE_ENV == 'prod';
 
+console.log('isProd', isProd);
+console.log('NODE_ENV', process.env.NODE_ENV);
+
 @Module({
   imports: [
     ConfigModule.forRoot({
